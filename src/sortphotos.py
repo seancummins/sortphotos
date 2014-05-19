@@ -115,7 +115,7 @@ def get_creation_time(path):
 
 # --------- main script -----------------
 
-def sortPhotos(src_dir, dest_dir, extensions, sort_format, move_files, removeDuplicates,
+def sortPhotos(src_dir, dest_dir, extensions, sort_format, move_files, preview, removeDuplicates,
                ignore_exif, day_begins):
 
 
@@ -158,12 +158,12 @@ def sortPhotos(src_dir, dest_dir, extensions, sort_format, move_files, removeDup
     for src_file in matched_files:
 
         # update progress bar
-        numdots = int(20.0*(idx+1)/num_files)
-        sys.stdout.write('\r')
-        sys.stdout.write('[%-20s] %d of %d ' % ('='*numdots, idx+1, num_files))
-        sys.stdout.flush()
-
-        idx += 1
+        if not preview:
+            numdots = int(20.0*(idx+1)/num_files)
+            sys.stdout.write('\r')
+            sys.stdout.write('[%-20s] %d of %d ' % ('='*numdots, idx+1, num_files))
+            sys.stdout.flush()
+            idx += 1
 
         if ignore_exif:
             date = parse_date_tstamp(src_file)
@@ -228,6 +228,9 @@ def sortPhotos(src_dir, dest_dir, extensions, sort_format, move_files, removeDup
         # finally move or copy the file
         if move_files:
             os.rename(src_file, dest_file)
+        elif preview:
+            src_filename = src_file.split('/')[-1]
+            print('* %s ===> %s' % (src_filename, dest_file))
         else:
             if fileIsIdentical:
                 continue  # if file is same, we just ignore it (for copy option)
@@ -249,6 +252,7 @@ if __name__ == '__main__':
     parser.add_argument('src_dir', type=str, help='source directory (searched recursively)')
     parser.add_argument('dest_dir', type=str, help='destination directory')
     parser.add_argument('-m', '--move', action='store_true', help='move files instead of copy')
+    parser.add_argument('-p', '--preview', action='store_true', help="preview (don't copy/move anything)")
     parser.add_argument('-s', '--sort', type=str, default='%Y/%m-%b',
                         help="choose destination folder structure using datetime format \n\
 https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior. \n\
@@ -270,7 +274,7 @@ defaults to 0 which corresponds to midnight.  Useful for grouping pictures with 
     args = parser.parse_args()
 
     sortPhotos(args.src_dir, args.dest_dir, args.extensions, args.sort,
-              args.move, not args.keep_duplicates, args.ignore_exif, args.day_begins)
+              args.move, args.preview, not args.keep_duplicates, args.ignore_exif, args.day_begins)
 
 
 
