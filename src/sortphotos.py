@@ -200,7 +200,8 @@ def sortPhotos(src_dir, dest_dir, extensions, sort_format, move_files, preview, 
         for thedir in dirs:
             dest_file = os.path.join(dest_file, thedir)
             if not os.path.exists(dest_file):
-                os.makedirs(dest_file)
+                if not preview:
+                    os.makedirs(dest_file)
 
         # setup destination file
         dest_file = os.path.join(dest_file, os.path.basename(src_file))
